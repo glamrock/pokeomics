@@ -1,0 +1,14 @@
+<%= form_for(@pokemon) do |f| %>
+  <% if @pokemon.errors.any? %>
+    <div id="errorExplanation">
+    <h2><%= pluralize(@post.errors.count, "error") %></h2>
+    <ul>
+    <% @pokemon.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+  <% end %>
+
+  <%= f.select "species_id", options_from_collection_for_select(Species.all, 'id', 'name') %>
+
+  <%= f.submit %>
+<% end %>
