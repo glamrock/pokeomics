@@ -7,11 +7,22 @@ class ExperimentsController < ApplicationController
     @data['baseSpeeds'] = Pokedex::PokemonStat.where(:stat_id => spid).map {|pstat| pstat.base_stat}
     @data['weights'] = Pokedex::Pokemon.all.map {|species| species.weight}
     @data['heights'] = Pokedex::Pokemon.all.map {|species| species.height}
+    @data['forms'] = {}
+
+    paths = Dir.glob('public/images/overworld/down/*.png')
+    paths.each do |path|
+      match = path.match(/(\d+)(.+?)?\.png/)
+      if match[2]
+        @data['forms'][match[1]] ||= []
+        @data['forms'][match[1]] << match[1]+match[2]
+      end
+    end
 
     @settings = {
       :speedStatBias => true,
-      :speedWeightBias => false,
-      :bobbleWeightBias => true,
+      #:speedWeightBias => true,
+      #:bobbleWeightBias => true,
+      #:bobbleStatBias => true,
       #:sizeHeightBias => true,
       :order => 'random',
     }

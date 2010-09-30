@@ -26,6 +26,7 @@
     var me = {};
 
     me.id = id;
+    me.form = id; // Change this if multiform Pokemon
     me.x = 0;
     me.y = 0;
 
@@ -39,6 +40,10 @@
     me.baseWeight = data['weights'][me.id-1];
 
     me.sizeMult = 1;
+
+    me.shiny = (Math.floor(Math.random * 8192) == 1);
+
+    //me.flies = (data['fliers'][me.id-1]);
 
     if (settings['sizeHeightBias']) {
       me.sizeMult *= me.baseHeight/meanHeight;
@@ -55,7 +60,7 @@
 
     // Make heavier Pokémon slower!
     if (settings['speedWeightBias']) {
-      speedBiases.push(weightBiased = me.speed * meanWeight/me.baseWeight);
+      speedBiases.push(me.speed * meanWeight/me.baseWeight);
     }
 
     if (speedBiases.length > 0) {
@@ -67,9 +72,20 @@
 
     me.framesPerBobble = 5;
 
-    if (settings['bobbleWeightBias']) {
-      me.framesPerBobble = Math.round(me.framesPerBobble*(me.baseWeight/meanWeight));
+    var bobbleBiases = [];
+
+    if (settings['bobbleStatBias']) {
+      bobbleBiases.push(me.framesPerBobble * meanSpeed/me.baseSpeed);
     }
+
+    if (settings['bobbleWeightBias']) {
+      bobbleBiases.push(me.framesPerBobble * me.baseWeight/meanWeight);
+    }
+
+    if (bobbleBiases.length > 0) {
+      me.framesPerBobble = Math.round(mean(bobbleBiases));
+    }
+
 
     var imgsToLoad = 0;
 
@@ -86,7 +102,7 @@
 
       ['up', 'down', 'left', 'right'].forEach(function(orientation) {
         [0, 1].forEach(function(frameState) {
-          var path = getFramePathCustom(orientation, frameState, me.id);
+          var path = getFramePathCustom(orientation, frameState, me.form);
 
           var img = new Image();
 
@@ -106,12 +122,12 @@
       checkLoaded();
     } 
 
-    function getFramePathCustom(orientation, frameState, id) {
-      return "/images/overworld/" + orientation + "/" + (frameState == 0 ? '' : 'frame2/') + id + ".png"
+    function getFramePathCustom(orientation, frameState, form) {
+      return "/images/overworld/" + (me.shiny ? 'shiny/' : '') + orientation + "/" + (frameState == 0 ? '' : 'frame2/') + form + ".png"
     }
 
     function getFramePath() {
-      return getFramePathCustom(me.orientation, me.frameState, me.id);
+      return getFramePathCustom(me.orientation, me.frameState, me.form);
     }
 
     function getFrame() {
@@ -164,7 +180,6 @@
     }
 
     function playCry() {
-      console.log(me.id);
       audio = $('audio#cry').get(0);
       audio.src = "/audio/dp_pokecry/" + me.id + ".mp3"
       audio.play();
@@ -215,13 +230,13 @@
         dexNum = Math.floor(1 + Math.random() * 493);
       }
 
-      //var dexNum = Math.floor(Math.random() * 493);
-      if ([201, 423, 386, 412, 413, 422].indexOf(dexNum) == -1) {
-        newSprite = new PokeSprite(dexNum);
+      newSprite = new PokeSprite(dexNum);
 
-
-        newSprite.load();
+      if (data['forms'][dexNum]) {
+        newSprite.form = data['forms'][dexNum][Math.floor(Math.random()*(data['forms'][dexNum].length-1))]
       }
+
+      newSprite.load();
 
       if (dexNum > 492) {
         dexNum = 0;
