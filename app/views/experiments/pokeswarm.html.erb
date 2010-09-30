@@ -155,7 +155,31 @@
       ctx.drawImage(getFrame(), me.x, me.y, width(), height());
     }
 
+    me.bounceInc = Math.round(Math.random()*1) == 0 ? -1 : 1;
+    me.bounceCount = 0;
+
+    function bounce() {
+      if (me.bounceCount % 10 == 0) {
+        me.bounceInc *= -1;
+      }
+
+      me.y += me.bounceInc*3;
+
+      if (me.y + height() > canvas.height) {
+        me.bounceInc = -1;
+      }
+
+      if (me.y - height() < 0) {
+        me.bounceInc = 1;
+      }
+
+      me.bounceCount += 1;
+    }
+
     function spin() {
+
+      bounce();
+
       switch (me.orientation) {
         case 'down':
           me.orientation = 'left';
@@ -212,10 +236,13 @@
 
     function click() {
       me.spinning = true;
+
+      me.oldSpeed = me.speed;
       me.speed *= 2;
+
       $('audio#cry').bind('ended', function() {
         me.spinning = false;        
-        me.speed /= 2;
+        me.speed = me.oldSpeed;
       });
       playCry();
       me.unHover();
