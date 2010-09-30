@@ -1,8 +1,26 @@
 <script type="text/javascript">
 
+  var settings = <%= raw @settings.to_json %>
+
+  var data = <%= raw @data.to_json %>
+
   var owFrames = {};
 
   var hoverSprite = null;
+
+  function mean(arr) {
+    var sum = 0.0;
+
+    for (var i in arr) {
+      sum += arr[i];
+    }
+
+    return sum/arr.length;
+  }
+
+  var meanSpeed = mean(data['baseSpeeds']);
+  var meanWeight = mean(data['weights']);
+  var meanHeight = mean(data['heights']);
 
   var PokeSprite = function(id) {
     var me = {};
@@ -15,6 +33,43 @@
     me.frameState = 0;
 
     me.loading = false;
+
+    me.baseSpeed = data['baseSpeeds'][me.id-1];
+    me.baseHeight = data['heights'][me.id-1];
+    me.baseWeight = data['weights'][me.id-1];
+
+    me.sizeMult = 1;
+
+    if (settings['sizeHeightBias']) {
+      me.sizeMult *= me.baseHeight/meanHeight;
+    }
+
+    me.speed = 5; // Default value
+
+    var speedBiases = [];
+
+    // Make Pokémon with higher Speed stats move faster!
+    if (settings['speedStatBias']) {
+      speedBiases.push(me.speed * me.baseSpeed/meanSpeed);
+    }
+
+    // Make heavier Pokémon slower!
+    if (settings['speedWeightBias']) {
+      speedBiases.push(weightBiased = me.speed * meanWeight/me.baseWeight);
+    }
+
+    if (speedBiases.length > 0) {
+      // Take the mean of the speedBiases instead of applying sequentially.
+      // Otherwise we end up with crazy extreme values!
+      console.log(me.speed);
+      me.speed = mean(speedBiases);
+    }
+
+    me.framesPerBobble = 5;
+
+    if (settings['bobbleWeightBias']) {
+      me.framesPerBobble = Math.round(me.framesPerBobble*(me.baseWeight/meanWeight));
+    }
 
     var imgsToLoad = 0;
 
@@ -68,25 +123,31 @@
       me.frameState = (me.frameState == 0 ? 1 : 0);
     }
 
-    function draw(ctx) {
-      ctx.drawImage(getFrame(), me.x, me.y);
-    }
-
-    function update() {
-      if (hoverSprite == me) {
-        bobble(); 
-      } else if (!hoverSprite) {
-        me.x += 3;
-        bobble();
-      }
+    function dimension(which) {
+      return Math.max(Math.min(Math.min(canvas.width, canvas.height), getFrame()[which]*me.sizeMult), 2);
     }
 
     function width() {
-      return getFrame().width;
+      return dimension('width');
     }
 
     function height() {
-      return getFrame().height;
+      return dimension('height');
+    }
+
+    function draw(ctx) {
+      ctx.drawImage(getFrame(), me.x, me.y, width(), height());
+    }
+
+    function update() {
+
+      if (me.framesPerBobble == 0 || frameCount % me.framesPerBobble == 0) {
+        bobble(); 
+      }
+
+      if (hoverSprite != me) {
+        me.x += me.speed;
+      }
     }
 
     function hover() {
@@ -123,7 +184,7 @@
     return me;
   }
 
-  var updateDelay = 75;
+  var updateDelay = 50;
 
   var sprites = [];
   var frameCount = 0;
@@ -147,10 +208,17 @@
 
     // Grab a new PokeSprite if our last one is up and marching.
     if (!newSprite || (!newSprite.loading && sprites.indexOf(newSprite) != -1)) {
-      dexNum += 1;
+
+      if (settings['order'] == 'national') {
+        dexNum += 1;
+      } else {
+        dexNum = Math.floor(1 + Math.random() * 493);
+      }
+
       //var dexNum = Math.floor(Math.random() * 493);
       if ([201, 423, 386, 412, 413, 422].indexOf(dexNum) == -1) {
         newSprite = new PokeSprite(dexNum);
+
 
         newSprite.load();
       }
@@ -162,8 +230,11 @@
 
     // Add the latest PokeSprite only if it won't squish the next one!
     if (newSprite && !newSprite.loading && (sprites.length == 0 || sprites[sprites.length-1].x > newSprite.width()*1.2)) {
+      newSprite.y = Math.floor(Math.random() * (canvas.height - newSprite.height()));
       sprites.push(newSprite);
     }
+
+    updateHoverSprite();
 
     var toRemove = [];
 
@@ -185,26 +256,31 @@
     }
   }
 
-  $(function() {  
-    canvas.width = $(document).width();
-    
-    $(canvas).mousemove(function(ev) {
-      mousex = ev.layerX;
-      mousey = ev.layerY; 
-
+  function updateHoverSprite() {
       for (var i in sprites) {
         var sprite = sprites[i];
-        if (mousex > sprite.x && mousex < sprite.x + sprite.width() &&
-            mousey > sprite.y && mousey < sprite.y + sprite.height()) {
+        if (mousex >= sprite.x && mousex <= sprite.x + sprite.width() &&
+            mousey >= sprite.y && mousey <= sprite.y + sprite.height()) {
           sprite.hover();
         } else {
           sprite.unHover();
         }
       }
+  }
+
+  $(function() {  
+    canvas.width = $(document).width();
+    canvas.height = $(document).height()/2;
+    
+    $(canvas).mousemove(function(ev) {
+      mousex = ev.layerX;
+      mousey = ev.layerY; 
     });
 
     $(canvas).mouseout(function(ev) {
-      hoverSprite = null;
+      if (hoverSprite) {
+        hoverSprite.unHover();
+      }
     });
 
     $(canvas).click(function(ev) {
