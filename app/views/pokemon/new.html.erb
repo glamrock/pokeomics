@@ -1,0 +1,14 @@
+<%= form_for(@pokemon) do |f| %>
+  <% unless @pokemon.errors.empty? %>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@pokemon.errors.count, "error") %> prohibited this post from being saved:</h2>
+      <ul>
+      <% @pokemon.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div> 
+  <% end %>
+  <%= f.select :species_id, Pokedex::Pokemon.all.collect {|p| [p.name, p.id] } %>
+  <%= f.submit %>
+<% end %>

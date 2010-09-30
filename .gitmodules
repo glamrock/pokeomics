@@ -1,3 +1,6 @@
 [submodule "db/pokedex"]
 	path = db/pokedex
 	url = git://veekun.com/pokedex.git
+[submodule "public/javascripts/jquery-ujs"]
+	path = public/javascripts/jquery-ujs
+	url = git://github.com/rails/jquery-ujs.git

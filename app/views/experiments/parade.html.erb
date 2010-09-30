@@ -1,0 +1,224 @@
+<script type="text/javascript">
+
+  var owFrames = {};
+
+  var hoverSprite = null;
+
+  var PokeSprite = function(id) {
+    var me = {};
+
+    me.id = id;
+    me.x = 0;
+    me.y = 0;
+
+    me.orientation = 'right';
+    me.frameState = 0;
+
+    me.loading = false;
+
+    var imgsToLoad = 0;
+
+    function checkLoaded() {
+      if (imgsToLoad <= 0) {
+        me.loading = false;
+        if (me.onLoad) me.onLoad();
+      }
+    }
+
+    // Start fetching the overworld frames for this species!
+    function load() {
+      var paths = [];
+
+      ['up', 'down', 'left', 'right'].forEach(function(orientation) {
+        [0, 1].forEach(function(frameState) {
+          var path = getFramePathCustom(orientation, frameState, me.id);
+
+          var img = new Image();
+
+          imgsToLoad += 1;
+          me.loading = true;
+
+          img.onload = function() {
+            owFrames[path] = img;
+            imgsToLoad -= 1;
+            checkLoaded();
+          }
+
+          img.src = path;
+        })
+      });
+
+      checkLoaded();
+    } 
+
+    function getFramePathCustom(orientation, frameState, id) {
+      return "/images/overworld/" + orientation + "/" + (frameState == 0 ? '' : 'frame2/') + id + ".png"
+    }
+
+    function getFramePath() {
+      return getFramePathCustom(me.orientation, me.frameState, me.id);
+    }
+
+    function getFrame() {
+      return owFrames[getFramePath()];
+    }
+
+    // ~bobble~
+    function bobble()  {
+      me.frameState = (me.frameState == 0 ? 1 : 0);
+    }
+
+    function draw(ctx) {
+      ctx.drawImage(getFrame(), me.x, me.y);
+    }
+
+    function update() {
+      if (hoverSprite == me) {
+        bobble(); 
+      } else if (!hoverSprite) {
+        me.x += 3;
+        bobble();
+      }
+    }
+
+    function width() {
+      return getFrame().width;
+    }
+
+    function height() {
+      return getFrame().height;
+    }
+
+    function hover() {
+      hoverSprite = me;
+      me.orientation = 'down';
+    }
+
+    function unHover() {
+      if (hoverSprite == me) {
+        hoverSprite = null;
+      }
+
+      me.orientation = 'right';
+    }
+
+    function playCry() {
+      console.log(me.id);
+      audio = $('audio#cry').get(0);
+      audio.src = "/audio/dp_pokecry/" + me.id + ".mp3"
+      audio.play();
+    }
+
+    me = $.extend(me, {
+      load: load,
+      update: update,
+      draw: draw,
+      width: width,
+      height: height,
+      hover: hover,
+      unHover: unHover,
+      playCry: playCry,
+    });
+
+    return me;
+  }
+
+  var updateDelay = 75;
+
+  var sprites = [];
+  var frameCount = 0;
+
+  var dexNum = 0;
+
+  var mousein = false;
+  var mousex;
+  var mousey;
+
+  var newSprite = null;
+  
+  function draw() {
+    frameCount += 1; 
+
+    var canvas = $('canvas').get(0);
+    var ctx = canvas.getContext('2d');
+
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // Grab a new PokeSprite if our last one is up and marching.
+    if (!newSprite || (!newSprite.loading && sprites.indexOf(newSprite) != -1)) {
+      dexNum += 1;
+      //var dexNum = Math.floor(Math.random() * 493);
+      if ([201, 423, 386, 412, 413, 422].indexOf(dexNum) == -1) {
+        newSprite = new PokeSprite(dexNum);
+
+        newSprite.load();
+      }
+
+      if (dexNum > 492) {
+        dexNum = 0;
+      }
+    }
+
+    // Add the latest PokeSprite only if it won't squish the next one!
+    if (newSprite && !newSprite.loading && (sprites.length == 0 || sprites[sprites.length-1].x > newSprite.width()*1.2)) {
+      sprites.push(newSprite);
+    }
+
+    var toRemove = [];
+
+    for (var i in sprites) {
+      var sprite = sprites[i];
+
+      sprite.update();
+      sprite.draw(ctx);
+
+      if (sprite.x > canvas.width) {
+        toRemove.push(sprite);
+      }
+    }
+
+    for (var i in toRemove) {
+      var sprite = toRemove[i];
+      sprites.splice(sprites.indexOf(sprite), 1);
+      delete sprite;
+    }
+  }
+
+  $(function() {  
+    canvas.width = $(document).width();
+    
+    $(canvas).mousemove(function(ev) {
+      mousex = ev.layerX;
+      mousey = ev.layerY; 
+
+      for (var i in sprites) {
+        var sprite = sprites[i];
+        if (mousex > sprite.x && mousex < sprite.x + sprite.width() &&
+            mousey > sprite.y && mousey < sprite.y + sprite.height()) {
+          sprite.hover();
+        } else {
+          sprite.unHover();
+        }
+      }
+    });
+
+    $(canvas).mouseout(function(ev) {
+      hoverSprite = null;
+    });
+
+    $(canvas).click(function(ev) {
+      if (hoverSprite) {
+        hoverSprite.playCry();
+      }
+    });
+
+    setInterval(draw, updateDelay);
+  });
+</script>
+
+<canvas id="canvas">
+</canvas>
+
+<audio id="cry">
+

@@ -3,5 +3,7 @@
 class Pokemon < ActiveRecord::Base
   set_table_name 'pokemon_individuals'
 
+  validates :species_id, :presence => true
+
   belongs_to :species, :class_name => "Pokedex::Pokemon"
 end
