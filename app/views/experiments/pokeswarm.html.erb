@@ -155,20 +155,43 @@
       ctx.drawImage(getFrame(), me.x, me.y, width(), height());
     }
 
-    function update() {
+    function spin() {
+      switch (me.orientation) {
+        case 'down':
+          me.orientation = 'left';
+          break;
+        case 'left':
+          me.orientation = 'up';
+          break;
+        case 'up':
+          me.orientation = 'right';
+          break;
+        case 'right':
+          me.orientation = 'down';
+          break;
+      }
+    }
 
+    function update() {
       if (me.framesPerBobble == 0 || frameCount % me.framesPerBobble == 0) {
         bobble(); 
       }
 
       if (hoverSprite != me) {
+        if (me.spinning || me.orientation != 'right') {
+          spin();
+        }
+
         me.x += me.speed;
       }
     }
 
     function hover() {
-      hoverSprite = me;
-      me.orientation = 'down';
+      if (!me.spinning) {
+        hoverSprite = me;
+
+        me.orientation = 'down';
+      }
     }
 
     function unHover() {
@@ -176,13 +199,26 @@
         hoverSprite = null;
       }
 
-      me.orientation = 'right';
+      if (!me.spinning) {
+        me.orientation = 'right';
+      }
     }
 
     function playCry() {
       audio = $('audio#cry').get(0);
       audio.src = "/audio/dp_pokecry/" + me.id + ".mp3"
       audio.play();
+    }
+
+    function click() {
+      me.spinning = true;
+      me.speed *= 2;
+      $('audio#cry').bind('ended', function() {
+        me.spinning = false;        
+        me.speed /= 2;
+      });
+      playCry();
+      me.unHover();
     }
 
     me = $.extend(me, {
@@ -194,6 +230,7 @@
       hover: hover,
       unHover: unHover,
       playCry: playCry,
+      click: click,
     });
 
     return me;
@@ -300,7 +337,7 @@
 
     $(canvas).click(function(ev) {
       if (hoverSprite) {
-        hoverSprite.playCry();
+        hoverSprite.click();
       }
     });
 
