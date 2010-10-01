@@ -7,7 +7,7 @@ class ExperimentsController < ApplicationController
     @data['baseSpeeds'] = Pokedex::PokemonStat.where(:stat_id => spid).map {|pstat| pstat.base_stat}
     @data['weights'] = Pokedex::Pokemon.gen(4).map {|species| species.weight}
     @data['heights'] = Pokedex::Pokemon.gen(4).map {|species| species.height}
-    @data['capRates'] = Pokedex::Pokemon.gen(4).map {|species| species.capture_rate}
+    @data['capRates'] = Pokedex::Pokemon.gen(4).map {|species| species.capture_rate}[0..492]
     @data['forms'] = {}
 
     paths = Dir.glob('public/images/overworld/down/*.png')
