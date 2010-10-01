@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Pokéomics</title>
+  <% add = yield(:title); add += ' - ' unless add.empty? %>
+  <title><%= add %>Pokéomics</title>
   <%= stylesheet_link_tag :all %>
   <%= javascript_include_tag :defaults %>
   <%= csrf_meta_tag %>
