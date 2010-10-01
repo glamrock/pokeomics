@@ -1,5 +1,2 @@
-<% Pokedex::Pokemon.all.each do |species| %>
-  <% if species.id <= 493 %>
-    <%= image_tag species.icon %>
-  <% end %>
-<% end %>
+Were you expecting something awesome here? I'm sorry, you'll have to come back later. In the meantime, here is a Paras:
+<%= image_tag Pokedex::Pokemon.find_by_name('Paras').icon %>
