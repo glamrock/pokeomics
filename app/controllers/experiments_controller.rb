@@ -5,8 +5,9 @@ class ExperimentsController < ApplicationController
 
     spid = Pokedex::Stat.find_by_name('Speed').id
     @data['baseSpeeds'] = Pokedex::PokemonStat.where(:stat_id => spid).map {|pstat| pstat.base_stat}
-    @data['weights'] = Pokedex::Pokemon.all.map {|species| species.weight}
-    @data['heights'] = Pokedex::Pokemon.all.map {|species| species.height}
+    @data['weights'] = Pokedex::Pokemon.gen(4).map {|species| species.weight}
+    @data['heights'] = Pokedex::Pokemon.gen(4).map {|species| species.height}
+    @data['capRates'] = Pokedex::Pokemon.gen(4).map {|species| species.capture_rate}
     @data['forms'] = {}
 
     paths = Dir.glob('public/images/overworld/down/*.png')
@@ -24,6 +25,7 @@ class ExperimentsController < ApplicationController
       #:bobbleWeightBias => true,
       #:bobbleStatBias => true,
       #:sizeHeightBias => true,
+      :appearByCaptureRate => true,
       :order => 'random',
     }
   end
