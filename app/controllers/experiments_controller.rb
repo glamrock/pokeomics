@@ -28,5 +28,7 @@ class ExperimentsController < ApplicationController
       :appearByCaptureRate => true,
       :order => 'random',
     }
+
+    @settings[:allShiny] = true if params[:shiny]
   end
 end

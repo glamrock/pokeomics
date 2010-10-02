@@ -28,6 +28,8 @@
   var meanWeight = mean(data['weights']);
   var meanHeight = mean(data['heights']);
 
+  var sparkleFrames = {};
+
   var PokeSprite = function(id) {
     var me = {};
 
@@ -47,7 +49,9 @@
 
     me.sizeMult = 1;
 
-    me.shiny = (Math.floor(Math.random * 8192) == 1);
+    me.shiny = settings['allShiny'] || (Math.floor(Math.random * 8192) == 1);
+
+    me.sizeClass = 'small';
 
     //me.flies = (data['fliers'][me.id-1]);
 
@@ -118,6 +122,11 @@
             owFrames[path] = img;
             imgsToLoad -= 1;
             checkLoaded();
+
+            if (img.width > 46) {
+              me.sizeClass = 'large';
+            }
+
           }
 
           img.src = path;
@@ -154,10 +163,6 @@
 
     function height() {
       return dimension('height');
-    }
-
-    function draw(ctx) {
-      ctx.drawImage(getFrame(), me.x, me.y, width(), height());
     }
 
     me.bounceInc = Math.round(Math.random()*1) == 0 ? -1 : 1;
@@ -201,9 +206,26 @@
       }
     }
 
+    me.sparkleState = 1;
+
+    // ~sparkly!~
+    function sparkle() {
+      me.sparkleState++;
+
+      if (me.sparkleState > 3) {
+        me.sparkleState = 1;
+      }
+    }
+
+    me.framesPerSparkle = 2;
+
     function update() {
       if (me.framesPerBobble == 0 || frameCount % me.framesPerBobble == 0) {
         bobble(); 
+      }
+
+      if (me.shiny && frameCount % me.framesPerSparkle == 0) {
+        sparkle();
       }
 
       if (hoverSprite != me) {
@@ -251,6 +273,31 @@
       });
       playCry();
       me.unHover();
+    }
+
+    function getSparklePath() {
+      return "/images/sparkles/" + me.sizeClass + "S" + me.sparkleState + ".png";
+    }
+
+    function getSparkleFrame() {
+
+      var path = getSparklePath();
+
+      if (!sparkleFrames[path]) {
+        var sparkle = new Image();
+        sparkle.src = getSparklePath();
+        sparkleFrames[path] = sparkle;
+      }
+
+      return sparkleFrames[path];
+    }
+
+    function draw(ctx) {
+      ctx.drawImage(getFrame(), me.x, me.y, width(), height());
+
+      if (me.shiny) {
+        ctx.drawImage(getSparkleFrame(), me.x, me.y, width(), height());
+      }
     }
 
     me = $.extend(me, {
