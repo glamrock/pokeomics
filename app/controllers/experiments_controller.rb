@@ -28,7 +28,11 @@ class ExperimentsController < ApplicationController
       :appearByCaptureRate => true,
       :order => 'random',
     }
-
-    @settings[:allShiny] = true if params[:shiny]
+    
+    params.each do |key, val|
+      @settings[key] = val.to_i if val.to_i.to_s == val
+      @settings[key] = false if val == 'false'
+      @esttings[key] = true if val == 'true'
+    end
   end
 end
