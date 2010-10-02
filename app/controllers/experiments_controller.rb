@@ -30,9 +30,11 @@ class ExperimentsController < ApplicationController
     }
     
     params.each do |key, val|
-      @settings[key] = val.to_i if val.to_i.to_s == val
-      @settings[key] = false if val == 'false'
-      @esttings[key] = true if val == 'true'
+      if val == 'false'; @settings[key] = false
+      elsif val == 'true'; @settings[key] = true
+      elsif val.to_i.to_s == val; @settings[key] = val.to_i
+      else @settings[key] = val
+      end
     end
   end
 end

@@ -357,6 +357,10 @@
         dexNum = Math.floor(1 + Math.random() * 493);
       }
 
+      if (dexNum > 493) {
+        dexNum = 1;
+      }
+
       newSprite = new PokeSprite(dexNum);
 
       if (data['forms'][dexNum]) {
@@ -364,10 +368,6 @@
       }
 
       newSprite.load();
-
-      if (dexNum > 492) {
-        dexNum = 1;
-      }
     }
 
     // Add the latest PokeSprite only if it won't squish the next one!
