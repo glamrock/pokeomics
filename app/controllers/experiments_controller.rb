@@ -37,4 +37,7 @@ class ExperimentsController < ApplicationController
       end
     end
   end
+
+  def pokepets
+  end
 end

@@ -1,0 +1,75 @@
+body {
+  text-align: center;
+}
+
+div {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div.header {
+  width: 50%;
+  border: 2px solid black;
+  text-align: center;
+  background-color: rgb(128, 0, 0);
+}
+
+div.header h1 {
+  color: white;
+}
+
+div.menu {
+  width: 75%;
+  height: 120px;
+
+  border: 1px solid black;
+}
+
+#menubox1, #menubox2 {
+  height: 90%;
+  width: 100px;
+  display: block;
+  border: 1px solid black;
+  position: relative;
+
+  top: 5%;
+
+  background-image: url('/images/overworld/down/101.png');
+}
+
+#menubox1 {
+  left: 1%;
+  float: left;
+}
+
+#menubox2 {
+  right: 1%;
+  float: right;
+}
+
+div.menu #menulinks {
+  height: 10%;
+  width: 20%;
+  min-width: 200px;
+
+  position: relative;
+  top: 10%;
+}
+
+div.menu #menulinks #column1 {
+  float: left;
+}
+
+div.menu #menulinks #column2 {
+  float: right;
+}
+
+div.menu #menulinks a {
+  display: block;
+  margin: 10px;
+}
+
+canvas#pokespace {
+  border: 2px solid black;
+}

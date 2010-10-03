@@ -1,0 +1,41 @@
+<% content_for :title do %>Poképet<% end %>
+
+<% content_for :head do %>
+  <%= javascript_include_tag 'pokepets.js'%>
+  <%= stylesheet_link_tag 'pokepets.css' %>
+<% end %>
+
+<script type="text/javascript">
+  var space;
+
+  $(function() {
+    space = new Space($('#pokespace').get(0));
+    space.init();
+  });
+
+</script>
+
+<div class="header">
+  <h1>Poképets</h1>
+</div>
+
+<div class="menu">
+  <span id="menubox1"></span>
+  <span id="menubox2"></span>
+
+  <div id="menulinks">
+    <div id="column1">
+      <a href="home">HOME</a>
+      <a href="adoption">Adoption</a>
+      <a href="shop">Shop</a>
+    </div>
+    <div id="column2">
+      <a href="help">Help</a>
+      <a href="pokegear">Pokegear</a>
+      <a href="login">Login</a>
+    </div>
+  </div>
+
+</div>
+
+<canvas id="pokespace"></canvas>
