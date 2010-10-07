@@ -327,11 +327,12 @@
   var mousey;
 
   var newSprite = null;
+
+  var canvas;
   
   function draw() {
     frameCount += 1; 
 
-    var canvas = $('canvas').get(0);
     var ctx = canvas.getContext('2d');
 
     ctx.globalCompositeOperation = 'destination-over';
@@ -411,6 +412,7 @@
   }
 
   $(function() {  
+    canvas = $('canvas').get(0);
     canvas.width = $(document).width();
     canvas.height = $(document).height()/2;
     
