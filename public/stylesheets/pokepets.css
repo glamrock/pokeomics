@@ -8,17 +8,6 @@ div {
   margin-right: auto;
 }
 
-div.header {
-  width: 50%;
-  border: 2px solid black;
-  text-align: center;
-  background-color: rgb(128, 0, 0);
-}
-
-div.header h1 {
-  color: white;
-}
-
 div.menu {
   width: 75%;
   height: 120px;
@@ -48,28 +37,44 @@ div.menu {
   float: right;
 }
 
-div.menu #menulinks {
-  height: 10%;
-  width: 20%;
-  min-width: 200px;
+div.header {
+  border: 2px solid black;
+  text-align: center;
+  background-color: rgb(128, 0, 0);
+
+  height: 90%;
+  width: 700px;
 
   position: relative;
-  top: 10%;
+  top: 5%;
 }
 
-div.menu #menulinks #column1 {
+div.header h1 {
+  color: white;
+}
+
+div.menu #column1, div.menu #column2 {
+  position: relative;
+  height: 90%;
+  top: 5%;
+  
+}
+
+div.menu #column1 {
   float: left;
 }
 
-div.menu #menulinks #column2 {
+div.menu #column2 {
   float: right;
 }
 
-div.menu #menulinks a {
+div.menu a {
   display: block;
   margin: 10px;
+  
 }
 
 canvas#pokespace {
+  margin: 1px;
   border: 2px solid black;
 }

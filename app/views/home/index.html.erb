@@ -1,2 +1,72 @@
-Were you expecting something awesome here? I'm sorry, you'll have to come back later. In the meantime, here is a Paras:
-<%= image_tag Pokedex::Pokemon.find_by_name('Paras').icon %>
+<html>
+<head>
+<script type="text/javascript">
+
+  var pokemon = <%= raw Pokedex::Pokemon.gen(4).map { |spe| spe.name.downcase }.inspect %>;
+   
+
+  $(function() {
+    $('#pokeform_species').change(function() {
+      var url = "/pokedex/sprite?species=" + $(this).val();
+      $('#pokeform_sprite').html("<img src='" + url + "' />");
+    });
+
+    function searchSelect(target) {
+      var values = $(target).text().split("\n").map(function(name) {
+        return name.trim().toLowerCase();
+      });
+
+      var timeout;
+
+      function makeSelection(i) {
+        $(target).val(i);
+
+        clearTimeout(timeout);
+        timeout = setTimeout(function() {
+          $(target).change();
+        }, 250);
+      }
+
+      return function() {
+        var input = $(this).val().toLowerCase();
+
+        if (input.length > 0) {
+          for (var i = 0; i < values.length; i++) {
+            if (values[i].indexOf(input) == 0) {
+              makeSelection(i);
+              return;
+            }
+          }
+        }
+      }
+    }
+
+    $("#pokeform_species_search").keyup(searchSelect('#pokeform_species'));
+    $("#pokeform_nature_search").keyup(searchSelect('#pokeform_nature'));
+
+    $('#pokeform_species').change();
+  });
+</script>
+</head>
+<body>
+<%=  %>
+<form id="pokeform">
+  Species: <input type="text" id="pokeform_species_search">
+  <select id="pokeform_species">
+  <% Pokedex::Pokemon.gen(4).each do |spe| %>
+    <option value='<%= spe.id %>'><%= spe.name %></option>
+  <% end %>
+  </select><br/>
+
+  Nature: <input type="text" id="pokeform_nature_search">
+  <select id="pokeform_nature">
+  <% Pokedex::Nature.all.each do |nat| %>
+    <option value='<%= nat.id %>'><%= nat.name %></option>
+  <% end %>
+  </select>
+
+  <div id="pokeform_sprite"></div> 
+
+</form>
+</body>
+</html>

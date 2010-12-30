@@ -31,4 +31,4 @@ gem 'mysql2'
 #   gem 'webrat'
 # end
 
-gem 'authlogic'
+gem 'authlogic', :git => 'git://github.com/odorcicd/authlogic.git', :branch => 'rails3'

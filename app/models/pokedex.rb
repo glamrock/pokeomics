@@ -15,7 +15,7 @@ module Pokedex
     class << self
       # Returns all species present in a given generation of games
       def gen(n)
-        Pokemon.all.find_all { |species| species.generation_id <= n }
+        Pokemon.all.find_all { |species| species.generation_id <= n && species.forme_base_pokemon_id.nil?}
       end
     end
 
@@ -94,4 +94,7 @@ module Pokedex
   end
   
 
+  class Nature < ActiveRecord::Base
+    include Pokedata
+  end
 end

@@ -59,4 +59,7 @@ Pokeomics::Application.routes.draw do
   match ':controller(/:action(/:id(.:format)))'
 
   resources :pokemon
+
+  resource :account, :controller => 'users'
+  resources :users
 end

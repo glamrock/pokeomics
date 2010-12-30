@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100929155909) do
+ActiveRecord::Schema.define(:version => 20101003124526) do
 
   create_table "abilities", :force => true do |t|
     t.string  "name",          :limit => 24,   :null => false
@@ -670,6 +670,29 @@ ActiveRecord::Schema.define(:version => 20100929155909) do
 
   add_index "types", ["damage_class_id"], :name => "damage_class_id"
   add_index "types", ["generation_id"], :name => "generation_id"
+
+  create_table "user_sessions", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "users", :force => true do |t|
+    t.string   "login"
+    t.string   "email"
+    t.string   "crypted_password"
+    t.string   "password_salt"
+    t.string   "persistence_token"
+    t.string   "perishable_token"
+    t.integer  "login_count"
+    t.integer  "failed_login_count"
+    t.datetime "last_request_at"
+    t.datetime "current_login_at"
+    t.datetime "last_Login_at"
+    t.string   "current_login_ip"
+    t.string   "last_login_ip"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "version_group_regions", :id => false, :force => true do |t|
     t.integer "version_group_id", :null => false
