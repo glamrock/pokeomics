@@ -1,21 +1,19 @@
 class PokemonController < ApplicationController
-  def new
-    @pokemon = Pokemon.new
+  before_filter :require_userish
 
-    respond_to do |format|
-      format.html
-    end
+  def require_userish
+    @current_user = User.first
   end
 
   def create
-    @pokemon = Pokemon.new(params[:pokemon])
+    pokemon = Pokemon.new({ :species_id => params['species_id'], :nature_id => params['nature_id'] })
+    pokemon.user = @current_user
+    pokemon.save
 
-    respond_to do |format|
-      if @pokemon.save
-        format.html { redirect_to @pokemon, :notice => "#{@pokemon.species.name} saved successfully!" }
-      else
-        format.html { render :action => "new" }
-      end
+    params['statdata'].each do |datum|
+      statdatum = PokemonStatDatum.new(datum)
+      statdatum.pokemon = pokemon
+      statdatum.save
     end
   end
 end

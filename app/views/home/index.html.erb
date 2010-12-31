@@ -41,15 +41,47 @@
       }
     }
 
+    function demandNumeric(event) {
+      if (event.which != 8 && (event.which < 48 || event.which > 57))
+        event.preventDefault();
+    }
+
+    $("#pokeform input.level").keypress(demandNumeric);
+    $("#pokeform input.stat").keypress(demandNumeric);
+
     $("#pokeform_species_search").keyup(searchSelect('#pokeform_species'));
     $("#pokeform_nature_search").keyup(searchSelect('#pokeform_nature'));
 
     $('#pokeform_species').change();
+
+    $('#pokeform button[type=submit]').click(function(event) {
+      var pokedata = {  species_id: $('#pokeform_species').val(), 
+                        nature_id: $('#pokeform_nature').val(),
+                        statdata: [] }
+
+      // Collate stat data
+      $('#pokeform .stat_row').each(function() {
+        var datum = { level: $('.level', this).val() }
+
+        $('.stat', this).each(function() {
+          datum[$(this).attr('name')] = $(this).val();
+        });
+
+        pokedata.statdata.push(datum);
+      });
+
+      $.post('/pokemon/create', pokedata, function() {
+      });
+                       
+
+      event.preventDefault();
+    });
+
+    
   });
 </script>
 </head>
 <body>
-<%=  %>
 <form id="pokeform">
   Species: <input type="text" id="pokeform_species_search">
   <select id="pokeform_species">
@@ -63,10 +95,20 @@
   <% Pokedex::Nature.all.each do |nat| %>
     <option value='<%= nat.id %>'><%= nat.name %></option>
   <% end %>
-  </select>
+  </select><br/>
+
+
+  <div class="stat_row">
+    Level: <input type="text" class="level" maxlength="3" size="1">
+    Stats:
+    <% Pokedex::Stat.all.each do |stat| %>
+      <input type="text" class="stat" name="<%= stat.name.downcase %>" maxlength="3" size="1">
+    <% end %><br/>
+  </div>
 
   <div id="pokeform_sprite"></div> 
 
+  <button type="submit">Add</button>
 </form>
 </body>
 </html>

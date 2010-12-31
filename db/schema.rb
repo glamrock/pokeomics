@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101003124526) do
+ActiveRecord::Schema.define(:version => 20101231002118) do
 
   create_table "abilities", :force => true do |t|
     t.string  "name",          :limit => 24,   :null => false
@@ -545,6 +545,8 @@ ActiveRecord::Schema.define(:version => 20101003124526) do
     t.integer  "species_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "user_id"
+    t.integer  "nature_id"
   end
 
   create_table "pokemon_internal_ids", :id => false, :force => true do |t|
@@ -597,6 +599,17 @@ ActiveRecord::Schema.define(:version => 20101003124526) do
   create_table "pokemon_shapes", :force => true do |t|
     t.string "name",         :limit => 24, :null => false
     t.string "awesome_name", :limit => 16, :null => false
+  end
+
+  create_table "pokemon_stat_data", :force => true do |t|
+    t.integer "pokemon_id"
+    t.integer "level"
+    t.integer "hp"
+    t.integer "attack"
+    t.integer "defense"
+    t.integer "special_attack"
+    t.integer "special_defense"
+    t.integer "speed"
   end
 
   create_table "pokemon_stats", :id => false, :force => true do |t|
