@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101231002118) do
+ActiveRecord::Schema.define(:version => 20101231054621) do
 
   create_table "abilities", :force => true do |t|
     t.string  "name",          :limit => 24,   :null => false
@@ -547,6 +547,7 @@ ActiveRecord::Schema.define(:version => 20101231002118) do
     t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "nature_id"
+    t.string   "gender",     :default => "female"
   end
 
   create_table "pokemon_internal_ids", :id => false, :force => true do |t|

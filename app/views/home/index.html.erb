@@ -3,14 +3,20 @@
 <script type="text/javascript">
 
   var pokemon = <%= raw Pokedex::Pokemon.gen(4).map { |spe| spe.name.downcase }.inspect %>;
+  var gender_rates = <%= raw Pokedex::Pokemon.gen(4).map { |spe| spe.gender_rate }.inspect %>;
    
+  var gender_symbols = { female: "<%= gender_symbol('female') %>",
+                         male: "<%= gender_symbol('male') %>" };
+
+  var stat_names = <%= raw Pokedex::Stat.all.map { |stat| stat.name }.inspect %>
+
+  var currentPokemon; // Currently selected Pokemon, if any.
 
   $(function() {
-    $('#pokeform_species').change(function() {
-      var url = "/pokedex/sprite?species=" + $(this).val();
-      $('#pokeform_sprite').html("<img src='" + url + "' />");
-    });
 
+    /**
+     * Keyup handler for a text input linked to a select box.
+     */
     function searchSelect(target) {
       var values = $(target).text().split("\n").map(function(name) {
         return name.trim().toLowerCase();
@@ -41,23 +47,130 @@
       }
     }
 
+    /**
+     * Keypress handler that disallows non-numeric character entry.
+     */
     function demandNumeric(event) {
       if (event.which != 8 && (event.which < 48 || event.which > 57))
         event.preventDefault();
     }
 
-    $("#pokeform input.level").keypress(demandNumeric);
-    $("#pokeform input.stat").keypress(demandNumeric);
+    /**
+     * Update the possible gender selections to reflect the currently selected species.
+     */
+    function updateGenderSelector() {
+      var id = $('#pokeform_species').val();
+      if (gender_rates[id-1] == -1) { // Ungendered Pokemon
+        $('#pokeform_gender').hide();
+      } else {
+        var genders = ['female', 'male'];
+
+        if (gender_rates[id-1] == 0) { // Male-only Pokemon
+          genders = ['male'];
+        } else if (gender_rates[id-1] == 8) { // Female-only Pokemon
+          genders = ['female'];
+        }
+
+        $('#pokeform_gender').html(genders.map(function(gender) {
+          return "<option value='" + gender + "'>" + gender_symbols[gender] + "</option>"
+        }).join(''));
+
+        $('#pokeform_gender').show();
+      }
+    }
+
+    /**
+     * Update form elements to reflect a given Pokemon species selection.
+     */
+    function selectSpecies(id) {
+      $('#pokeform_species').val(id);
+
+      var url = "/pokedex/sprite?species=" + id;
+      $('#pokeform_sprite').html("<img src='" + url + "' />");
+
+      updateGenderSelector();
+    }
+
+    /**
+     * Add a stat data row to the form, with optional argument for prefilling.
+     */
+    function addStatRow(data) {
+      var row = $('#pokeform .stat_row_template').clone()
+                .removeClass('stat_row_template')
+                .addClass('stat_row')
+                .show();
+
+      if (data) {
+        $('.level', row).val(data.level);
+        $('.stat', row).each(function() {
+          $(this).val(data[$(this).attr('name')]);
+        });
+      }
+
+      $('#pokeform_stats').append(row);
+    }
+
+    /**
+     * Fill form with data from a given Pokemon.
+     */
+    function showPokemon(id) {
+      $.getJSON('/pokemon/data/'+ id, function(poke) {
+        console.log(poke)
+        selectSpecies(poke.species_id);
+        $('#pokeform_gender').val(poke.gender);
+        $('#pokeform_nature').val(poke.nature_id);
+
+        $('#pokeform_add').hide();
+        $('#pokeform_update').show();
+        $('#pokeform_remove').show();
+
+        $('#pokeform .stat_row').remove();
+
+        poke.statdata.forEach(function(datum) {
+          addStatRow(datum);
+        });
+
+        currentPokemon = poke;
+      });
+    }
+
+    function refreshPokemonList() {
+      $.get('/pokemon/list', function(data) {
+        $('#pokemon_list').html(data);
+
+        $('#pokemon_list a').click(function() {
+          showPokemon($(this).attr('id').split('_')[1]);
+        });
+      });
+    }
+
+    $('#pokeform_species').change(function() {
+      selectSpecies($(this).val());
+    });
+
+
+    $("#pokeform input.level").live('keypress', demandNumeric);
+    $("#pokeform input.stat").live('keypress', demandNumeric);
 
     $("#pokeform_species_search").keyup(searchSelect('#pokeform_species'));
     $("#pokeform_nature_search").keyup(searchSelect('#pokeform_nature'));
 
-    $('#pokeform_species').change();
+    selectSpecies(1);
+    addStatRow();
 
-    $('#pokeform button[type=submit]').click(function(event) {
+    /**
+     * POST pokeform data as JSON to the given target.
+     */
+    function submitPokeform(target) {
       var pokedata = {  species_id: $('#pokeform_species').val(), 
                         nature_id: $('#pokeform_nature').val(),
                         statdata: [] }
+
+      if (gender_rates[pokedata.species_id-1] == -1) {
+        pokedata.gender = 'neuter';
+      } else {
+        pokedata.gender = $('#pokeform_gender').val();
+      }
 
       // Collate stat data
       $('#pokeform .stat_row').each(function() {
@@ -70,45 +183,82 @@
         pokedata.statdata.push(datum);
       });
 
-      $.post('/pokemon/create', pokedata, function() {
-      });
-                       
+      $.post(target, pokedata, requireSuccess(refreshPokemonList));
+    }
 
-      event.preventDefault();
+    // AJAX handler requiring that data either:
+    // 1. If a string, equals '^_^'
+    // 2. Does not have an 'error' property
+    function requireSuccess(callback) {
+      return function(data) {
+        if (data.error || (typeof data == 'string' && data != '^_^')) {
+          alert(data.error || data);
+          return;
+        }
+
+        callback();
+      }
+    }
+
+
+    $('#pokeform_add').click(function(event) {
+      submitPokeform('/pokemon/create');
     });
 
-    
+    $('#pokeform_update').click(function(event) {
+      submitPokeform('/pokemon/update/' + currentPokemon.id);
+    });
+
+    $('#pokeform_remove').click(function(event) {
+      $.post('/pokemon/destroy/' + currentPokemon.id, requireSuccess(function() {
+        $('#pokeform').hide();   
+        refreshPokemonList();
+      }));
+    });
+
+    refreshPokemonList();
+
   });
 </script>
 </head>
 <body>
+<h1>Pokéomics</h1>
+<div id="pokemon_list"></div>
+
+<div id="pokemon_details"></div>
+
 <form id="pokeform">
-  Species: <input type="text" id="pokeform_species_search">
-  <select id="pokeform_species">
+  <%# Species: <input type="text" id="pokeform_species_search" size="8"> %>
+  <select id="pokeform_species" title="Species">
   <% Pokedex::Pokemon.gen(4).each do |spe| %>
     <option value='<%= spe.id %>'><%= spe.name %></option>
   <% end %>
-  </select><br/>
+  </select>
 
-  Nature: <input type="text" id="pokeform_nature_search">
-  <select id="pokeform_nature">
+  <%# Nature: <input type="text" id="pokeform_nature_search" size="8"> %>
+  <select id="pokeform_nature" title="Nature">
   <% Pokedex::Nature.all.each do |nat| %>
     <option value='<%= nat.id %>'><%= nat.name %></option>
   <% end %>
-  </select><br/>
+  </select>
+  <select id="pokeform_gender" title="Gender"></select><br/>
 
+  <div id="pokeform_stats">
 
-  <div class="stat_row">
+  <div class="stat_row_template" style="display: none;">
     Level: <input type="text" class="level" maxlength="3" size="1">
     Stats:
     <% Pokedex::Stat.all.each do |stat| %>
-      <input type="text" class="stat" name="<%= stat.name.downcase %>" maxlength="3" size="1">
+      <input type="text" class="stat" name="<%= stat.name.downcase.gsub(' ', '_') %>" maxlength="3" size="1">
     <% end %><br/>
+  </div>
   </div>
 
   <div id="pokeform_sprite"></div> 
 
-  <button type="submit">Add</button>
+  <button id="pokeform_add">Add</button>
+  <button id="pokeform_update" style="display: none;">Save</button>
+  <button id="pokeform_remove" style="display: none;">Remove</button>
 </form>
 </body>
 </html>

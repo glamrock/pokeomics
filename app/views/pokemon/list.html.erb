@@ -1,0 +1,4 @@
+<% @current_user.pokemon.each do |poke| %>
+  <a id="poke_<%= poke.id %>"><%= image_tag poke.species.icon %></a>
+<% end%>
+
