@@ -52,6 +52,20 @@ module Pokedex
       paths
     end 
 
+    def previous_evolution
+      evo = Pokedex::Evolution.find_by_to_pokemon_id(id)
+      evo.nil? ? nil : evo.from_pokemon
+    end
+
+    def can_breed?
+      !is_baby && egg_groups.length > 0 && !egg_groups.include?(Pokedex::EggGroup.find_by_name('No Eggs'))
+    end
+
+    def can_breed_with?(species)
+      return true if id == 132 || species.id == 132
+      can_breed? && species.can_breed? && (egg_groups - species.egg_groups).length < egg_groups.length
+    end
+
     has_and_belongs_to_many :egg_groups, :join_table => 'pokemon_egg_groups'
     has_and_belongs_to_many :types, :join_table => 'pokemon_types'
   end
@@ -76,6 +90,16 @@ module Pokedex
     include Pokedata
 
     has_and_belongs_to_many :pokemon, :join_table => 'pokemon_egg_groups'
+  end
+
+  # Defines evolutionary transitions between Pokemon and their properties.
+  class Evolution < ActiveRecord::Base
+    include Pokedata
+
+    set_table_name "pokemon_evolution"
+
+    belongs_to :from_pokemon, :class_name => "Pokedex::Pokemon"
+    belongs_to :to_pokemon, :class_name => "Pokedex::Pokemon"
   end
 
   # Defines a Pokemon type

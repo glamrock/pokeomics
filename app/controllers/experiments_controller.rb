@@ -38,7 +38,20 @@ class ExperimentsController < ApplicationController
     end
   end
 
-  def pokepets
-    
+  def pokenet_data
+    conns = []
+
+    candidates = Pokedex::Pokemon.gen(4).find_all { |poke| poke.can_breed? && poke.previous_evolution.nil? }
+
+    conns = candidates.combination(2)
+
+    conns = conns.
+      find_all { |conn| conn[0].can_breed_with?(conn[1]) }.
+      map { |conn| [conn[0].id, conn[1].id] }.
+      uniq
+  end
+
+  def pokenet
+    @params = params
   end
 end

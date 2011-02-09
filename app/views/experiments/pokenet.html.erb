@@ -1,0 +1,13 @@
+<% content_for :title do %>Pokénet<% end %>
+
+<% content_for :head do %>
+  <script>
+    var connections = <%= raw @connections.to_json %>
+    var params = <%= raw @params.to_json %>
+  </script>
+  <%= javascript_include_tag 'arbor.js' %>
+  <%= javascript_include_tag 'pokenet.js' %>
+<% end %>
+
+<!--<div id="infovis"></div>-->
+<canvas id="viewport">
