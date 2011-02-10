@@ -54,4 +54,7 @@ class ExperimentsController < ApplicationController
   def pokenet
     @params = params
   end
+
+  def countdown
+  end
 end

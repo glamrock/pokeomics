@@ -1,0 +1,39 @@
+<% content_for :title do %>Countdown<% end %>
+
+<% content_for :head do %>
+  <%= javascript_include_tag 'pokeimg.js' %>
+  <%= stylesheet_link_tag 'countdown/style.css' %>
+  <%= javascript_include_tag 'countdown/base.js' %>
+
+  <script>
+    $(function() {
+      PokeImg.spriteForms = <%= raw Dir.glob('public/images/overworld/down/*.png').map { |s| s.split(/\//)[-1].split('.')[0] }.inspect %>
+
+      $('body').bind('imagesLoaded', function() {
+        $('#credits').show();
+        $('#credits').css('top', window.innerHeight - $('#credits').height() - 1);
+        $('#credits').css('left', (window.innerWidth - $('#credits').width()) / 2);
+      });
+
+      PokeImg.spriteForms.forEach(function(form) {
+        PokeImg.getFrameCustom({ form: form });
+      });
+
+      //$('#countdown').attr('height', window.innerHeight + 'px');
+      //ctx = $('#canvas-content');
+      //ctx.css('left', (window.innerWidth-ctx.width())/2 + 'px' );
+    });
+
+  </script>
+<% end %>
+
+<div id="canvas-content">
+  <div id="countdown">
+  </div>
+</div>
+<%= javascript_include_tag 'countdown/box2d.js' %>
+<%= javascript_include_tag 'countdown/io.js' %>
+
+<div id="credits">
+  Based on the <a href="http://www.google.com/events/io/2011/">Google I/O 2011</a> timer. Adapted by <a href="http://lemma.org/">Daniel Assange</a>.
+</div>
