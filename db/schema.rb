@@ -634,12 +634,6 @@ ActiveRecord::Schema.define(:version => 20101231054621) do
     t.string "name", :limit => 16, :null => false
   end
 
-  create_table "species", :force => true do |t|
-    t.string   "name"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "stats", :force => true do |t|
     t.integer "damage_class_id"
     t.string  "name",            :limit => 16, :null => false
