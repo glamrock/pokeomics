@@ -297,8 +297,10 @@ Dot.prototype.draw = function() {
           this.d = document.createElement('span');
           this.d.className = 'ball';
           //this.d.src = '/images/overworld/down/montage.png'; //PokeImg.getFrameCustom({ form: PokeImg.spriteForms.sample() }).src;
-          this.d.style['background-image'] = "url('/images/overworld/montages/down/montage.png')";
-          this.d.style['background-position'] = (-32 * Math.floor(Math.random() * 559)) + "px 0px";
+
+          var d = $(this.d);
+          d.css('background-image', "url('/images/overworld/montages/down/montage.png')");
+          d.css('background-position', (-32 * Math.floor(Math.random() * 559)) + "px 0px");
           this.ctx.appendChild(this.d);
       }
       this.d.style.left = this.x + 'px';
@@ -790,8 +792,6 @@ var digitColors = ['265897', '265897', '265897', '',
     * Reference to the DOM node where everything is drawn.
     */
   ctx = io.el('countdown');
-
-  console.log(ctx);
 
   /**
     * Used everywhere to adjust position of items for screen width/height.
