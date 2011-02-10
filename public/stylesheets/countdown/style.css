@@ -66,8 +66,7 @@ body.degrade #gradient {
     width: 515px;
     z-index: 99;
 }
-#countdown h3 a,
-#header h3 a {
+#countdown h3 a {
     color: #898989;
     padding-right: 45px;
     position: absolute;
@@ -79,15 +78,7 @@ body.degrade #gradient {
     left: 0;
     z-index: 99;
 }
-#nav {
-    margin: 0;
-    padding: 0;
-    position: absolute;
-    right: 0;
-    bottom: 40px;
-    z-index: 99;
-}
-#nav li, #countdown li {
+#countdown li {
     position: relative;
     list-style: none;
     margin: 0 0 0 6px;
@@ -95,7 +86,7 @@ body.degrade #gradient {
     float: left;
     background: transparent url(../img/nav-button-left-sprite.png) no-repeat top left;
 }
-#nav li a, #countdown li a {
+#countdown li a {
     display: block;
     background-image: url(../img/nav-button-sprite.png);
     background-repeat: no-repeat;
@@ -107,22 +98,18 @@ body.degrade #gradient {
     font-size: 16px;
     padding: 0 20px 0 10px;
 }
-#nav li:hover, #countdown li:hover {
+#countdown li:hover {
     background-position: left -33px;
 }
-#nav li:hover > a, #countdown li:hover > a {
+#countdown li:hover > a {
     background-position: right -33px;
     color: #205aaf;
 }
-#nav li:active, #countdown li:active,
-#nav li.active, #countdown li.active {
+#countdown li:active,
+#countdown li.active {
     background-position: left -66px;
 }
 #countdown li:active > a, #countdown li.active > a,
-#nav li:active > a, #nav li.active > a {
-    background-position: right -66px;
-    color: #FFF;
-}
 
 #canvas-content {
     margin: 100px auto 0 auto;

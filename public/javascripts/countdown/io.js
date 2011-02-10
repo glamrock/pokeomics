@@ -47,8 +47,7 @@ function createWorld() {
   var gravity = new b2Vec2(0, 500);
   var doSleep = true;
   var world = new b2World(worldAABB, gravity, doSleep);
-  createGround(world, (window.innerHeight ||
-                        document.documentElement.clientHeight) - 355);
+  createGround(world, window.innerHeight - parseInt($('#canvas-content').css('margin-top')) - $('#canvas-content').height() - 50);
   return world;
 }
 
@@ -809,8 +808,7 @@ var digitColors = ['265897', '265897', '265897', '',
     * Resize ground and refetch countdownBounds when window is resized.
     */
   io.listen('resize', window, function() {
-      createGround(world, (window.innerHeight ||
-                            document.documentElement.clientHeight) - 355);
+      createGround(world, window.innerHeight - parseInt($('#canvas-content').css('margin-top')) - $('#canvas-content').height() - 50);
       countdownBounds = getPos(ctx);
   });
 
