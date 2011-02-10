@@ -295,9 +295,11 @@ function Dot(opts) {
 Dot.prototype.draw = function() {
   if (this.willDraw) {
       if (!this.d) {
-          this.d = document.createElement('img');
+          this.d = document.createElement('span');
           this.d.className = 'ball';
-          this.d.src = PokeImg.getFrameCustom({ form: PokeImg.spriteForms.sample() }).src; //'/images/countdown/ball-' + this.fillStyle + '.png';
+          //this.d.src = '/images/overworld/down/montage.png'; //PokeImg.getFrameCustom({ form: PokeImg.spriteForms.sample() }).src;
+          this.d.style['background-image'] = "url('/images/overworld/montages/down/montage.png')";
+          this.d.style['background-position'] = (-32 * Math.floor(Math.random() * 559)) + "px 0px";
           this.ctx.appendChild(this.d);
       }
       this.d.style.left = this.x + 'px';
@@ -824,10 +826,8 @@ var digitColors = ['265897', '265897', '265897', '',
       io.listen('mousedown', document, hactivator);
   }
 
-  $('body').bind('imagesLoaded', function() {
-    /**
-      * Loop!
-      */
-    setInterval(draw, 30);
-  });
+  /**
+    * Loop!
+    */
+  setInterval(draw, 30);
 }());

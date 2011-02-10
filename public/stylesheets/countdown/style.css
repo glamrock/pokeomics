@@ -25,9 +25,9 @@ a:hover {
     right: 0;
     bottom: 0;
 }
-#countdown img.ball {
-    width: 25px;
-    height: 25px;
+#countdown .ball {
+    width: 32px;
+    height: 32px;
     position: absolute;
 }
 #gradient {
@@ -132,7 +132,6 @@ body.degrade #gradient {
 }
 
 #credits {
-  display: none;
   position: absolute;
   top: 800px;
 }
