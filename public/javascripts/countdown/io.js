@@ -173,12 +173,16 @@ function Digit(opts) {
 * @return {null}
 */
 Digit.prototype.draw = function() {
+  if (this.backgroundOffset === undefined) {
+    this.backgroundOffset = (-32 * Math.floor(Math.random() * 559) + "px 0px");
+  }
   if (this.dots.length == 0) {
       totalDotCount -= this.removedDotCount;
       this.done = true;
       return;
   }
   for (var j = 0; j < this.dots.length; j++) {
+      this.dots[j].backgroundOffset = this.backgroundOffset;
       if (this.removed) {
           // only draw dots that are colored ('active')
           if (this.dots[j].isActive && !degraded) {
@@ -300,7 +304,7 @@ Dot.prototype.draw = function() {
 
           var d = $(this.d);
           d.css('background-image', "url('/images/overworld/montages/down/montage.png')");
-          d.css('background-position', (-32 * Math.floor(Math.random() * 559)) + "px 0px");
+          d.css('background-position', this.backgroundOffset);
           this.ctx.appendChild(this.d);
       }
       this.d.style.left = this.x + 'px';
