@@ -11,13 +11,13 @@
   var hoverSprite = null;
 
   function sum(arr) {
-    var sum = 0;
+    var total = 0;
     
-    for (var i in arr) {
-      sum += arr[i];
-    }
+    arr.forEach(function(val) {
+      total += val;
+    });
 
-    return sum;
+    return total;
   }
 
   function mean(arr) {
@@ -381,7 +381,7 @@
 
     var toRemove = [];
 
-    for (var i in sprites) {
+    for (var i = 0; i < sprites.length; i++) {
       var sprite = sprites[i];
 
       sprite.update();
@@ -392,7 +392,7 @@
       }
     }
 
-    for (var i in toRemove) {
+    for (var i = 0; i < toRemove.length; i++) {
       var sprite = toRemove[i];
       sprites.splice(sprites.indexOf(sprite), 1);
       delete sprite;
@@ -400,7 +400,7 @@
   }
 
   function updateHoverSprite() {
-      for (var i in sprites) {
+      for (var i = 0; i < sprites.length; i++) {
         var sprite = sprites[i];
         if (mousex >= sprite.x && mousex <= sprite.x + sprite.width() &&
             mousey >= sprite.y && mousey <= sprite.y + sprite.height()) {
