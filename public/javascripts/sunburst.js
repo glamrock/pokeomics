@@ -69,23 +69,40 @@ function drawSunburst(totals) {
       'Fairy': 'Psychic',
       'No Eggs': '#4e4e58',
       'Monster': '#bd1010',
-      'Indeterminate': '#7b7b58'
+      'Indeterminate': '#7b7b58',
+
+      'HP': 'Normal',
+      'Attack': 'Fighting',
+      'Defense': 'Steel',
+      'Special Attack': 'Psychic',
+      'Special Defense': 'Grass',
+      'Speed': 'Electric'
     };
 
     function findColor(name) {
-        var lname = name.toLowerCase();
-        for (var key in colormap) {
-            var lkey = key.toLowerCase();
-            if (lkey.indexOf(lname) !== -1 || lname.indexOf(lkey) !== -1) {
-                if (colormap[key].indexOf('#') === -1) { // Internal reference
-                    return findColor(colormap[key]);
-                } else {
-                    return colormap[key];
+        var color;
+
+        if (colormap[name]) { 
+            def = colormap[name];
+        } else {
+            var lname = name.toLowerCase();
+            for (var key in colormap) {
+                var lkey = key.toLowerCase();
+                if (lkey.indexOf(lname) !== -1 || lname.indexOf(lkey) !== -1) {
+                    def = colormap[key];
                 }
             }
         }
 
-        return nextColor();
+        if (def) {
+            if (def.indexOf('#') === -1) { // Internal reference
+                return findColor(def);
+            } else {
+                return def;
+            }
+        } else {
+            return nextColor();
+        }
     }
 
 	for (var name in totals) {

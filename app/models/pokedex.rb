@@ -38,6 +38,10 @@ module Pokedex
       bases
     end
 
+    def highest_base_stat
+      base_stats.invert[base_stats.values.max]
+    end
+
     # Returns path to the DP party icon for this species
     def icon
       "dp_icons/%.3d.gif" % id
@@ -100,6 +104,10 @@ module Pokedex
 
     belongs_to :from_pokemon, :class_name => "Pokedex::Pokemon"
     belongs_to :to_pokemon, :class_name => "Pokedex::Pokemon"
+  end
+
+  # Defines a Pokemon evolution chain.
+  class EvolutionChain < ActiveRecord::Base
   end
 
   # Defines a Pokemon type

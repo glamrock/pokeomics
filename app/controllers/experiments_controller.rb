@@ -74,9 +74,13 @@ class ExperimentsController < ApplicationController
       Pokedex::EggGroup.all.each do |group|
         @totals[group.name.capitalize] = group.pokemon.find_all { |poke| poke.generation_id <= gen }.length
       end
-    elsif params[:id] == "evo_stages"
-      @title = "Pokemon by Evolutionary Stage"
-       
+    elsif params[:id] == "highest_stat"
+      @title = "Pokemon by Highest Base Stat"
+      
+      Pokedex::Pokemon.gen(gen).each do |poke|
+        stat = poke.highest_base_stat
+        @totals[stat] = (@totals[stat] ||= 0) + 1
+      end
     end
   end
 end
