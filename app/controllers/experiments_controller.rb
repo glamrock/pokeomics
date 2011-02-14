@@ -57,4 +57,25 @@ class ExperimentsController < ApplicationController
 
   def countdown
   end
+
+  def sunburst
+    @totals = {}
+
+    gen = params[:gen] ? params[:gen].to_i : 4
+
+    if params[:id] == 'types'
+      @title = "Pokemon by Type"
+      Pokedex::Type.all.each do |type|
+        @totals[type.name.capitalize] = type.pokemon.find_all { |poke| poke.generation_id <= gen }.length
+      end
+    elsif params[:id] == 'egg_groups'
+      @title = "Pokemon by Egg Group"
+      Pokedex::EggGroup.all.each do |group|
+        @totals[group.name.capitalize] = group.pokemon.find_all { |poke| poke.generation_id <= gen }.length
+      end
+    elsif params[:id] == "evo_stages"
+      @title = "Pokemon by Evolutionary Stage"
+       
+    end
+  end
 end

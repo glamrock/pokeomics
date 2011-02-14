@@ -1,0 +1,15 @@
+<% content_for :title do %><%= @title.gsub('Pokemon', 'Pokémon') %><% end %>
+
+<% content_for :head do %>
+  <%= stylesheet_link_tag 'sunburst.css' %>
+  <%= javascript_include_tag 'jit-mod.js' %>
+  <%= javascript_include_tag 'sunburst.js' %>
+  <script>
+    var Input = {};
+    Input.totals = <%= raw @totals.to_json %>;
+    Input.graphTitle = <%= raw @title.inspect %>
+  </script>
+<% end %>
+
+<div id="infovis"></div>
+<div id="credits">Created by <a href="http://www.lemma.org">Daniel Assange</a> using the <a href="http://thejit.org">JIT</a>.</div>
