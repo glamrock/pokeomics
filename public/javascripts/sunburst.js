@@ -24,10 +24,14 @@ function drawSunburst(totals) {
 	//var colors = ["#416D9C", "#70A35E", "#EBB056", "#83548B", "#909291", "#557EAA"];
 	//var colors = ["CE0F0F", "CE660F", "097C7C", "0CA50C", "9B2F2F", "9B602F", "1C5D5D", "267C26"];
 
-    var total = 0;
+    if (Input.total) {
+        var total = Input.total;
+    } else {
+        var total = 0;
 
-    for (var client in totals) {
-        total += parseInt(totals[client]);
+        for (var client in totals) {
+            total += parseInt(totals[client]);
+        }
     }
 
     var colors = ["#416D9C", "#70A35E", "#EBB056", "#83548B", "#909291", "#557EAA"];

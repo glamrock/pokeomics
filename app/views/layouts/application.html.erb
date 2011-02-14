@@ -4,8 +4,6 @@
   <% add = yield(:title); add += ' - ' unless add.empty? %>
   <title><%= add %>Pokéomics</title>
   <%= javascript_include_tag :defaults %>
-  <%= javascript_include_tag "jquery-1.4.3.min.js" %>
-  <%= javascript_include_tag "jquery-json.js" %>
   <%= csrf_meta_tag %>
   <%= yield :head %>
 </head>

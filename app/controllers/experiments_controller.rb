@@ -70,6 +70,7 @@ class ExperimentsController < ApplicationController
       end
     elsif params[:id] == 'egg_groups'
       @title = "Pokemon by Egg Group"
+      @total = Pokedex::Pokemon.gen(gen).length
       Pokedex::EggGroup.all.each do |group|
         @totals[group.name.capitalize] = group.pokemon.find_all { |poke| poke.generation_id <= gen }.length
       end

@@ -7,7 +7,8 @@
   <script>
     var Input = {};
     Input.totals = <%= raw @totals.to_json %>;
-    Input.graphTitle = <%= raw @title.inspect %>
+    Input.total = <%= raw @total.to_json %>;
+    Input.graphTitle = <%= raw @title.inspect %>;
   </script>
 <% end %>
 
