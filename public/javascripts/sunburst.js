@@ -111,22 +111,24 @@ function drawSunburst(realOpts) {
 		name: opts.title 
 	};
 
-	if (opts.total) {
+	if (!opts.total) {
 		var total = 0;
 
 		for (var client in opts.totals) {
 			total += parseInt(opts.totals[client]);
 		}
+
+		opts.total = total;
 	}
 
 	for (var name in opts.totals) {
-		var percent = 
+		var percent = ((opts.totals[name]/total)*100).toFixed();
 	
 		json.children.push({ 
 			children: [], 
 			data: {
-				"$angularWidth": opts.totals[name],
-				coverage: ((opts.totals[name]/total)*100).toFixed(),
+				"$angularWidth": percent,
+				coverage: percent,
 				total: opts.totals[name],
 				"$color": Colors.find(name)
 			},
