@@ -162,10 +162,12 @@ function drawSunburst(totals) {
           },
 		  onClick: function(node) {
 			sb.tips.hide();
-			sb.rotate(node, animate? 'animate' : 'replot', {
-			  duration: 1000,
-			  transition: $jit.Trans.Quart.easeInOut
-			});
+            if (node) {
+                sb.rotate(node, animate? 'animate' : 'replot', {
+                  duration: 1000,
+                  transition: $jit.Trans.Quart.easeInOut
+                });
+            }
 		  },
 		},
 	});
