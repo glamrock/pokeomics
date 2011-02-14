@@ -9,8 +9,6 @@ html, body {
 
 #infovis {
     position:relative;
-    width:900px;
-    height:800px;
     margin:auto;
     overflow:hidden;
 }
@@ -79,4 +77,10 @@ input:focus {
 
 #credits a:hover {
 	text-decoration: underline;
+}
+
+#error {
+    position: relative;
+    display: none;
+    color: red;
 }

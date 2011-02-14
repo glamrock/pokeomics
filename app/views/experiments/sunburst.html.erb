@@ -5,12 +5,29 @@
   <%= javascript_include_tag 'jit-mod.min.js' %>
   <%= javascript_include_tag 'sunburst.js' %>
   <script>
-    var Input = {};
-    Input.totals = <%= raw @totals.to_json %>;
-    Input.total = <%= raw @total.to_json %>;
-    Input.graphTitle = <%= raw @title.inspect %>;
+    $(function() {
+      function redraw() {
+          var width = window.innerWidth, height = window.innerHeight-$('#credits').height();
+          $('#infovis *').remove();
+          $('#infovis').css('width', width);
+          $('#infovis').css('height', height);
+
+          drawSunburst({ title: <%= raw @title.inspect %>.replace("Pokemon", "Pokémon"),
+                         total: <%= raw @total.to_json %>,
+                         totals: <%= raw @totals.to_json %> });
+      }
+
+      var resizeResponseTimer;
+      $(window).resize(function() {
+          clearTimeout(resizeResponseTimer);
+          resizeResponseTimer = setTimeout(redraw, 100);
+      });
+
+      redraw();
+    });
   </script>
 <% end %>
 
+<div id="error"></div>
 <div id="infovis"></div>
 <div id="credits">Created by <a href="http://www.lemma.org">Daniel Assange</a> using the <a href="http://thejit.org">JIT</a>.</div>

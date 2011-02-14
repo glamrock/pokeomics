@@ -1,50 +1,13 @@
-var labelType, useGradients, nativeTextSupport, animate;
+var nativeCanvasSupport;
 
 (function() {
-  var ua = navigator.userAgent,
-      iStuff = ua.match(/iPhone/i) || ua.match(/iPad/i),
-      typeOfCanvas = typeof HTMLCanvasElement,
-      nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function'),
-      textSupport = nativeCanvasSupport 
-        && (typeof document.createElement('canvas').getContext('2d').fillText == 'function');
-  labelType = (!nativeCanvasSupport || (textSupport && !iStuff))? 'Native' : 'HTML';
-  nativeTextSupport = labelType == 'Native';
-  useGradients = nativeCanvasSupport;
-  animate = !(iStuff || !nativeCanvasSupport);
+	var typeOfCanvas = typeof HTMLCanvasElement;
+	nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function');
 })();
 
-function drawSunburst(totals) {
-	var json = { 
-		children: [],
-		data: { "$type": "none" },
-		id: "Source",
-		name: Input.graphTitle.replace("Pokemon", "Pokémon")
-	};
-
-	//var colors = ["#416D9C", "#70A35E", "#EBB056", "#83548B", "#909291", "#557EAA"];
-	//var colors = ["CE0F0F", "CE660F", "097C7C", "0CA50C", "9B2F2F", "9B602F", "1C5D5D", "267C26"];
-
-    if (Input.total) {
-        var total = Input.total;
-    } else {
-        var total = 0;
-
-        for (var client in totals) {
-            total += parseInt(totals[client]);
-        }
-    }
-
-    var colors = ["#416D9C", "#70A35E", "#EBB056", "#83548B", "#909291", "#557EAA"];
-    //var colors = ["CE0F0F", "CE660F", "097C7C", "0CA50C", "9B2F2F", "9B602F", "1C5D5D", "267C26"];
-    var colindex = -1;
-
-    function nextColor() {
-        colindex += 1;
-        if (colindex >= colors.length) colindex = 0;
-        return colors[colindex];
-    }
-
-    var colormap = {
+var Colors = {
+	// Maps node name to fillStyle
+    specific: {
       'Normal': '#a6a677',
       'Fire': '#f08030',
       'Water': '#6294ff',
@@ -77,100 +40,129 @@ function drawSunburst(totals) {
       'Special Attack': 'Psychic',
       'Special Defense': 'Grass',
       'Speed': 'Electric'
-    };
+    },
 
-    function findColor(name) {
+	generic: ["#416D9C", "#70A35E", "#EBB056", "#83548B", "#909291", "#557EAA"],
+	genericIndex: -1,
+
+	// Retrieve the next generic color in the sequence.
+    nextGeneric: function() {
+        if (this.genericIndex >= this.generics.length) this.genericIndex = 0;
+        return this.generics[colindex];
+    },
+
+	// Retrieve a matching color if available; else the next generic one.
+	find: function(name) {
         var color;
 
-        if (colormap[name]) { 
-            def = colormap[name];
+        if (this.specific[name]) { 
+            def = this.specific[name];
         } else {
             var lname = name.toLowerCase();
-            for (var key in colormap) {
+            for (var key in this.specific) {
                 var lkey = key.toLowerCase();
                 if (lkey.indexOf(lname) !== -1 || lname.indexOf(lkey) !== -1) {
-                    def = colormap[key];
+                    def = this.specific[key];
                 }
             }
         }
 
         if (def) {
             if (def.indexOf('#') === -1) { // Internal reference
-                return findColor(def);
+                return this.find(def);
             } else {
                 return def;
             }
         } else {
-            return nextColor();
+            return this.nextColor();
+        }
+    }
+}
+
+function error(err) {
+	$('#infovis').hide();
+	$('#credits').hide();
+
+	var errorDiv = $("#error");
+	errorDiv.text(err);
+	errorDiv.css('top', (window.innerHeight/2)-errorDiv.height());
+	errorDiv.fadeIn();
+}
+
+function drawSunburst(realOpts) {
+	if (!nativeCanvasSupport) {
+		return error("This software requires native support for the HTML5 canvas. Please use a modern browser :)");
+	}
+
+	var opts = $.extend({
+		title: '',
+		total: null,
+		totals: {}
+	}, realOpts);
+
+	for (var key in realOpts) {
+		opts[key] = realOpts[key];
+	}
+
+	var json = { 
+		children: [],
+		data: { "$type": "none" },
+		id: "Source",
+		name: opts.title 
+	};
+
+    if (opts.total) {
+        var total = 0;
+
+        for (var client in opts.totals) {
+            total += parseInt(opts.totals[client]);
         }
     }
 
-	for (var name in totals) {
-		var percent = ((totals[name]/total)*100).toFixed();
+	for (var name in opts.totals) {
+		var percent = 
 	
 		json.children.push({ 
 			children: [], 
 			data: {
-				"$angularWidth": percent,
-				coverage: percent,
-                total: totals[name],
-				"$color": findColor(name)
+				"$angularWidth": opts.totals[name],
+				coverage: ((opts.totals[name]/total)*100).toFixed(),
+                total: opts.totals[name],
+				"$color": Colors.find(name)
 			},
 			name: name,
 			id: name
 		});
 	}
 
-	window.sb = new $jit.Sunburst({
-		//id container for the visualization
+	var sb = new $jit.Sunburst({
 		injectInto: 'infovis',
-		//Distance between levels
 		levelDistance: 150,
 		flatLabels: true,
 		labelOffset: 8,
         hoveredColor: '#fff',
-		//Change node and edge styles such as
-		//color, width and dimensions.
 		Node: {
 		  overridable: true,
-		  type: useGradients ? 'gradient-multipie' : 'multipie',
+		  type: 'gradient-multipie',
 		  alpha: 0
 		},
-		//Select canvas labels
-		//'HTML', 'SVG' and 'Native' are possible options
 		Label: {
-		  type: labelType,
-		  
-		},
-		//Change styles when hovering and clicking nodes
-		NodeStyles: {
-		  enable: true,
 		  type: 'Native',
-		  /*stylesClick: {
-			'color': '#860505'
-		  },
-		  stylesHover: {
-            CanvasStyles: {
-              'strokeStyle': '#5DBDBD'
-            },
-		  }*/
 		},
-		//Add tooltips
 		Tips: {
 		  enable: true,
 		  onShow: function(tip, node) {
 			var html = "<div class=\"tip-title\">" + node.name + "</div>"; 
 			var data = node.data;
             if ("total" in data) {
-				html += "<strong>Total:</strong> " + data.total + "<br/>";
+				html += "<div><strong>Total:</strong> " + data.total + "</div>";
             }
 			if ("coverage" in data) {
-				html += "<strong>Proportion:</strong> " + data.coverage + "%";
+				html += "<div><strong>Proportion:</strong> " + data.coverage + "%</div>";
 			}
 			tip.innerHTML = html;
 		  }
 		},
-		//implement event handlers
 		Events: {
 		  enable: true,
           onMouseEnter: function(node) {
@@ -184,7 +176,7 @@ function drawSunburst(totals) {
 		  onClick: function(node) {
 			sb.tips.hide();
             if (node) {
-                sb.rotate(node, animate? 'animate' : 'replot', {
+                sb.rotate(node, 'animate', {
                   duration: 1000,
                   transition: $jit.Trans.Quart.easeInOut
                 });
@@ -193,10 +185,10 @@ function drawSunburst(totals) {
 		},
 	});
 
-	//load JSON data.
 	sb.loadJSON(json);
-	//compute positions and plot.
 	sb.refresh();
+
+	// Animated rotate-y fade in!
 
 	sb.graph.eachNode(function(node) {
 		node.setData('alpha', 1, 'end');
@@ -214,20 +206,3 @@ function drawSunburst(totals) {
 	});
 }
 
-$(function() {
-    function redraw() {
-        var width = window.innerWidth, height = window.innerHeight-$('#credits').height();
-        $('#infovis *').remove();
-		$('#infovis').css('width', window.innerWidth);
-		$('#infovis').css('height', window.innerHeight-$('#credits').height());
-        drawSunburst(Input.totals);
-    }
-
-    var timeout;
-    $(window).resize(function() {
-        clearTimeout(timeout);
-        timeout = setTimeout(redraw, 100);
-    });
-    redraw();
-
-});
