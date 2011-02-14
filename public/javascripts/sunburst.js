@@ -122,7 +122,7 @@ function drawSunburst(realOpts) {
 	}
 
 	for (var name in opts.totals) {
-		var percent = ((opts.totals[name]/total)*100).toFixed();
+		var percent = ((opts.totals[name]/opts.total)*100).toFixed();
 	
 		json.children.push({ 
 			children: [], 
