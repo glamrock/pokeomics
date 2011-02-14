@@ -6,24 +6,24 @@
   <%= javascript_include_tag 'sunburst.js' %>
   <script>
     $(function() {
-      function redraw() {
-          var width = window.innerWidth, height = window.innerHeight-$('#credits').height();
-          $('#infovis *').remove();
-          $('#infovis').css('width', width);
-          $('#infovis').css('height', height);
+        function redraw() {
+            var width = window.innerWidth, height = window.innerHeight-$('#credits').height();
+            $('#infovis *').remove();
+            $('#infovis').css('width', width);
+            $('#infovis').css('height', height);
 
-          drawSunburst({ title: <%= raw @title.inspect %>.replace("Pokemon", "Pokémon"),
-                         total: <%= raw @total.to_json %>,
-                         totals: <%= raw @totals.to_json %> });
-      }
+            drawSunburst({ title: <%= raw @title.inspect %>.replace("Pokemon", "Pokémon"),
+                           total: <%= raw @total.to_json %>,
+                           totals: <%= raw @totals.to_json %> });
+        }
 
-      var resizeResponseTimer;
-      $(window).resize(function() {
-          clearTimeout(resizeResponseTimer);
-          resizeResponseTimer = setTimeout(redraw, 100);
-      });
+        var resizeResponseTimer;
+        $(window).resize(function() {
+            clearTimeout(resizeResponseTimer);
+            resizeResponseTimer = setTimeout(redraw, 100);
+        });
 
-      redraw();
+        redraw();
     });
   </script>
 <% end %>
