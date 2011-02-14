@@ -68,10 +68,15 @@ input:focus {
 }
 
 #credits {
-    font-size: 75%;
-    color: white;
+	font-size: 80%;
+    color: gray;
 }
   
 #credits a {
     text-decoration: none;
+	color: darkgreen;
+}
+
+#credits a:hover {
+	text-decoration: underline;
 }
