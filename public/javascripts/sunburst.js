@@ -232,7 +232,7 @@ function drawSunburst(realOpts) {
 	var json = [{ 
 		data: { "$type": "none" },
 		id: "Source",
-		name: '',//opts.title,
+		name: opts.title,
 		adjacencies: []
 	}];
 
@@ -256,7 +256,7 @@ function drawSunburst(realOpts) {
 				"coverage": percent,
 				"total": opts.totals[name],
 				"$color": Colors.find(name),
-				"$type": "none"
+				//"$type": "none"
 			},
 			"name": name,
 			"id": name,

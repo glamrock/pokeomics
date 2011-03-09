@@ -83,6 +83,7 @@ class ExperimentsController < ApplicationController
           when 0 then '#0000ff'
         end
 
+=begin
         @connections[from] ||= []
         @connections[from] << { 
           "nodeTo" => to, 
@@ -92,6 +93,7 @@ class ExperimentsController < ApplicationController
             "$direction" => [from, to]
           } 
         }
+=end
       end
     elsif params[:id] == 'egg_groups'
       @title = "Pokemon by Egg Group"
@@ -99,7 +101,7 @@ class ExperimentsController < ApplicationController
       Pokedex::EggGroup.all.each do |group|
         @totals[group.name.capitalize] = group.pokemon.find_all { |poke| poke.generation_id <= gen }.length
       end
-    elsif params[:id] == "highest_stat"
+    elsif params[:id] == "highest_stats"
       @title = "Pokemon by Highest Base Stat"
       
       Pokedex::Pokemon.gen(gen).each do |poke|
