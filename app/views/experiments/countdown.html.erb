@@ -6,13 +6,13 @@
 
   <script>
     $(function() {
-      function credits() {
+      function centering() {
         $('#credits').css('top', window.innerHeight - $('#credits').height() - 1);
         $('#credits').css('left', (window.innerWidth - $('#credits').width()) / 2);
       }
 
-      credits();
-      $(window).resize(credits);
+      centering();
+      $(window).resize(centering);
     });
 
   </script>
@@ -24,6 +24,8 @@
 </div>
 <%= javascript_include_tag 'countdown/box2d.js' %>
 <%= javascript_include_tag 'countdown/io.js' %>
+
+<a href="http://www.pokemonblackwhite.com/en-au/"><img id="final_image" src="/images/countdown/Pokemon-Black-and-White.jpg"></a>
 
 <div id="credits">
   Based on the <a href="http://www.google.com/events/io/2011/">Google I/O 2011</a> timer. Adapted by <a href="http://lemma.org/">Daniel Assange</a>.

@@ -9,6 +9,7 @@
 var totalDotCount = 0, dotThreshold = 150;
 var iterations = 1, timeStep = 1 / 20, ground;
 var world = createWorld();
+var finished = false;
 
 /**
 * Returns a random number between two numbers.
@@ -236,7 +237,7 @@ Digit.prototype.remove = function() {
   var successor = numberMatrices[this.num-1] ||
       numberMatrices[numberMatrices.length-1];
   var current = numberMatrices[this.num];
-  if (successor) {
+  if (!finished && successor) {
       if (!this.num == 0 || this.num == 1) {
           var s = 0;
           for (var i = 0; i < successor.length; i++) {
@@ -487,8 +488,11 @@ var digitColors = ['265897', '265897', '265897', '',
   function getDigits() {
       var now = new Date().getTime();
       var dateDiff = Math.floor((countdownTo-now)/1000);
+      if (dateDiff < 0) dateDiff = 0;
       var days = padNum(Math.floor(dateDiff/86400), 3);
+      if (days < 0) days = 0;
       var timeRemaining = Math.floor(dateDiff%86400);
+      if (timeRemaining < 0) timeRemaining = 0;
       var hours = padNum(Math.floor(timeRemaining/3600), 2);
       var minutes = padNum(Math.floor((timeRemaining%3600)/60), 2);
       var seconds = padNum(((timeRemaining%3600)%60)%60, 2);
@@ -504,7 +508,6 @@ var digitColors = ['265897', '265897', '265897', '',
     * @return {null}
     */
   function draw() {
-
       /**
         * Get digit array as of this cycle in the loop.
         */
@@ -522,81 +525,87 @@ var digitColors = ['265897', '265897', '265897', '',
         */
       currentDigits = [];
 
-      /**
-        * Loop through all digits and generate Digit objects as needed.
-        */
-      for (var i = 0; i < digits.length; i++) {
+      if (finished) {
+        oldDigits.forEach(function(digit) {
+          discardedDigits.push(digit);
+        });
+      } else {
+        /**
+          * Loop through all digits and generate Digit objects as needed.
+          */
+        for (var i = 0; i < digits.length; i++) {
 
-          /**
-            * Check oldDigits to see if this Digit exists. If so, reuse it.
-            */
-          if (oldDigits.length > 0 && digits[i] == oldDigits[i].num) {
-              currentDigits.push(oldDigits[i]);
-              /**
-                * Increment the cursor based on the Digit value.
-                * Separator (':') gets it's X incremented by 2 widths of Dot,
-                *     otherwise it does the default 5 widths
-                *     (the full width of a Digit).
-                */
-              if (digits[i] == ':') {
-                  cursorX += (2*20);
-              } else {
-                  cursorX += (5*21)-1;
-              }
-          } else {
+            /**
+              * Check oldDigits to see if this Digit exists. If so, reuse it.
+              */
+            if (oldDigits.length > 0 && digits[i] == oldDigits[i].num) {
+                currentDigits.push(oldDigits[i]);
+                /**
+                  * Increment the cursor based on the Digit value.
+                  * Separator (':') gets it's X incremented by 2 widths of Dot,
+                  *     otherwise it does the default 5 widths
+                  *     (the full width of a Digit).
+                  */
+                if (digits[i] == ':') {
+                    cursorX += (2*20);
+                } else {
+                    cursorX += (5*21)-1;
+                }
+            } else {
 
-              /**
-                * Separator (':') gets different constructor values
-                */
-              if (digits[i] == ':') {
-                  currentDigits.push(
-                      new Digit({
-                          ctx: ctx,
-                          x: cursorX,
-                          y: 14,
-                          num: digits[i],
-                          matrix: separator,
-                          activeColor: 'b6b4b5'
-                      })
-                  );
-                  cursorX += (2*20);
-              } else {
-                  /**
-                    * Add a new Digit
-                    */
-                  currentDigits.push(
-                      new Digit({
-                          ctx: ctx,
-                          x: cursorX,
-                          y: 14,
-                          num: parseInt(digits[i]),
-                          matrix: numberMatrices[parseInt(digits[i])],
-                          activeColor: digitColors[i],
-                          blankColor: ((i < 4 || i > 9) ?
-                                        'c9c9c9' :
-                                        'd9d9d9'),
-                          successor: oldDigits.length ? oldDigits[i] : null
-                      })
-                  );
-                  cursorX += (5*21)-1;
-              }
-              /**
-                * Run the draw routine on the Digit, rendering itself
-                *    on the ctx.
-                */
-              currentDigits[i].draw();
+                /**
+                  * Separator (':') gets different constructor values
+                  */
+                if (digits[i] == ':') {
+                    currentDigits.push(
+                        new Digit({
+                            ctx: ctx,
+                            x: cursorX,
+                            y: 14,
+                            num: digits[i],
+                            matrix: separator,
+                            activeColor: 'b6b4b5'
+                        })
+                    );
+                    cursorX += (2*20);
+                } else {
+                    /**
+                      * Add a new Digit
+                      */
+                    currentDigits.push(
+                        new Digit({
+                            ctx: ctx,
+                            x: cursorX,
+                            y: 14,
+                            num: parseInt(digits[i]),
+                            matrix: numberMatrices[parseInt(digits[i])],
+                            activeColor: digitColors[i],
+                            blankColor: ((i < 4 || i > 9) ?
+                                          'c9c9c9' :
+                                          'd9d9d9'),
+                            successor: oldDigits.length ? oldDigits[i] : null
+                        })
+                    );
+                    cursorX += (5*21)-1;
+                }
+                /**
+                  * Run the draw routine on the Digit, rendering itself
+                  *    on the ctx.
+                  */
+                currentDigits[i].draw();
 
-              /**
-                * If a Digit exist on oldDigits in this position,
-                *     it's ready to be 'discarded', meaning start the
-                *     Dot animation. Append it to the discardedDigits
-                *     array to be looped through again.
-                */
-              if (oldDigits.length) {
-                  var old = oldDigits[i];
-                  discardedDigits.push(old);
-              }
-          }
+                /**
+                  * If a Digit exist on oldDigits in this position,
+                  *     it's ready to be 'discarded', meaning start the
+                  *     Dot animation. Append it to the discardedDigits
+                  *     array to be looped through again.
+                  */
+                if (oldDigits.length) {
+                    var old = oldDigits[i];
+                    discardedDigits.push(old);
+                }
+            }
+        }
       }
 
       /**
@@ -627,6 +636,13 @@ var digitColors = ['265897', '265897', '265897', '',
         * compare the current set to the previous one.
         */
       oldDigits = currentDigits;
+      finished = digits.every(function(el) { return (el == "0" || el == ":") });
+
+      if (finished && !$('#final_image').is(':visible')) {
+        setTimeout(function() {
+          $('#final_image').fadeIn('slow');
+        }, 3000);
+      }
   }
 
 
@@ -781,6 +797,10 @@ var digitColors = ['265897', '265897', '265897', '',
     * Get the date we're counting down to.
     */
   var countdownTo = new Date(2011, 2, 10, 0, 0, 0).getTime();
+  if (countdownTo < new Date().getTime()) {
+      countdownTo = new Date().getTime()+5000;
+  }
+
 
   /**
     * Buckets for the Digits.
