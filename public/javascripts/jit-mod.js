@@ -6334,6 +6334,7 @@ var EdgeHelper = {
       return EdgeHelper.line.contains(posFrom, posTo, pos, epsilon);
     }
   },
+
   /*
     Object: EdgeHelper.hyperline
   */

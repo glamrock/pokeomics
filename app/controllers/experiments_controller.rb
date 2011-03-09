@@ -61,12 +61,37 @@ class ExperimentsController < ApplicationController
   def sunburst
     @totals = {}
 
+    @connections = {}
+
     gen = params[:gen] ? params[:gen].to_i : 4
 
     if params[:id] == 'types'
       @title = "Pokemon by Type"
       Pokedex::Type.all.each do |type|
         @totals[type.name.capitalize] = type.pokemon.find_all { |poke| poke.generation_id <= gen }.length
+      end
+
+      Pokedex::TypeEfficacy.all.each do |eff| 
+        next if eff.damage_factor <= 100 # Not interested in neutral connections.
+
+        from = eff.damage_type.name.capitalize
+        to = eff.target_type.name.capitalize
+
+        color = case eff.damage_factor
+          when 50 then '#ff0000'
+          when 200 then '#00ff00'
+          when 0 then '#0000ff'
+        end
+
+        @connections[from] ||= []
+        @connections[from] << { 
+          "nodeTo" => to, 
+          "data" => { 
+            "$type" => "hyperarrow_external",
+            "$color" => color,
+            "$direction" => [from, to]
+          } 
+        }
       end
     elsif params[:id] == 'egg_groups'
       @title = "Pokemon by Egg Group"

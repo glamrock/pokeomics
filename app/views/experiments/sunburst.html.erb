@@ -2,7 +2,7 @@
 
 <% content_for :head do %>
   <%= stylesheet_link_tag 'sunburst.css' %>
-  <%= javascript_include_tag 'jit-mod.min.js' %>
+  <%= javascript_include_tag 'jit-mod.js' %>
   <%= javascript_include_tag 'sunburst.js' %>
   <script>
     $(function() {
@@ -14,7 +14,8 @@
 
             drawSunburst({ title: <%= raw @title.inspect %>.replace("Pokemon", "Pokémon"),
                            total: <%= raw @total.to_json %>,
-                           totals: <%= raw @totals.to_json %> });
+                           totals: <%= raw @totals.to_json %>,
+                           connections: <%= raw @connections.to_json %>});
         }
 
         var resizeResponseTimer;

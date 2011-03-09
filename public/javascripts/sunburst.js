@@ -89,6 +89,130 @@ function error(err) {
 	errorDiv.fadeIn();
 }
 
+function getOuterNodePos(node, levelDistance) {
+	var polar = node.pos.clone();
+	polar.rho += levelDistance;
+	return polar.getc();
+}
+
+function midway(theta1, theta2) {
+}
+
+$jit.Sunburst.Plot.EdgeTypes.implement({
+	'hyperarrow_external': {
+		'render': function(adj, canvas) {
+			var ldist = this.config.levelDistance;
+			var ctx = canvas.getCtx();
+
+			// Hyperline
+			var from = getOuterNodePos(adj.nodeFrom, ldist),
+				to = getOuterNodePos(adj.nodeTo, ldist),
+				dim = Math.max(from.norm(), to.norm());
+			//this.edgeHelper.hyperline.render(from.$scale(1/dim), to.$scale(1/dim), dim, canvas);
+
+			var control = adj.nodeTo.pos.clone();
+			control.theta = midway(adj.nodeFrom.pos.theta, adj.nodeTo.pos.theta);
+			control.rho += ldist + ldist;
+			window.control = control;
+			cont = control.getc();
+
+			ctx.beginPath();
+			ctx.moveTo(from.x, from.y);
+			ctx.quadraticCurveTo(cont.x, cont.y, to.x, to.y);
+			ctx.stroke();
+
+
+			// Arrow
+			var polar = adj.nodeTo.pos.clone();
+			polar.rho += ldist*2;
+			var from = polar.getc();
+			
+
+			
+			var dim = adj.getData('dim'),
+				direction = adj.data.$direction,
+				swap = (direction && direction.length>1 && direction[0] != adj.nodeFrom.id);
+
+			// invert edge direction
+			if (swap) {
+			  var tmp = from;
+			  from = to;
+			  to = tmp;
+			}
+			var vect = new $jit.Complex(to.x - from.x, to.y - from.y);
+			vect.$scale(dim / vect.norm());
+			var intermediatePoint = new $jit.Complex(to.x - vect.x, to.y - vect.y),
+				normal = new $jit.Complex(-vect.y / 2, vect.x / 2),
+				v1 = intermediatePoint.add(normal),
+				v2 = intermediatePoint.$add(normal.$scale(-1));
+
+			/*ctx.beginPath();
+			ctx.moveTo(from.x, from.y);
+			ctx.lineTo(to.x, to.y);
+			ctx.stroke();*/
+			ctx.beginPath();
+			ctx.moveTo(v1.x, v1.y);
+			ctx.lineTo(v2.x, v2.y);
+			ctx.lineTo(to.x, to.y);
+			ctx.closePath();
+			ctx.fill();
+		},
+		'contains': $jit.util.lambda(false)
+    },
+
+	'hyperarrow_internal': {
+		'render': function(adj, canvas) {
+			var ctx = canvas.getCtx();
+
+			// Hyperline
+			var from = getOuterNodePos(adj.nodeFrom, this.config.levelDistance),
+				to = getOuterNodePos(adj.nodeTo, this.config.levelDistance),
+				dim = Math.max(from.norm(), to.norm());
+			//this.edgeHelper.hyperline.render(from.$scale(1/dim), to.$scale(1/dim), dim, canvas);
+
+			ctx.beginPath();
+			ctx.moveTo(from.x, from.y);
+			ctx.quadraticCurveTo(0, 0, to.x, to.y);
+			ctx.stroke();
+
+
+
+
+			// Arrow
+			var from = { x: 0, y : 0}//adj.nodeFrom.pos.getc(true),
+				to = adj.nodeTo.pos.getc(true),
+				dim = adj.getData('dim'),
+				direction = adj.data.$direction,
+				swap = (direction && direction.length>1 && direction[0] != adj.nodeFrom.id);
+
+			// invert edge direction
+			if (swap) {
+			  var tmp = from;
+			  from = to;
+			  to = tmp;
+			}
+			var vect = new $jit.Complex(to.x - from.x, to.y - from.y);
+			vect.$scale(dim / vect.norm());
+			var intermediatePoint = new $jit.Complex(to.x - vect.x, to.y - vect.y),
+				normal = new $jit.Complex(-vect.y / 2, vect.x / 2),
+				v1 = intermediatePoint.add(normal),
+				v2 = intermediatePoint.$add(normal.$scale(-1));
+
+			/*ctx.beginPath();
+			ctx.moveTo(from.x, from.y);
+			ctx.lineTo(to.x, to.y);
+			ctx.stroke();*/
+			ctx.beginPath();
+			ctx.moveTo(v1.x, v1.y);
+			ctx.lineTo(v2.x, v2.y);
+			ctx.lineTo(to.x, to.y);
+			ctx.closePath();
+			ctx.fill();
+		},
+		'contains': $jit.util.lambda(false)
+    }
+});
+
 function drawSunburst(realOpts) {
 	if (!nativeCanvasSupport) {
 		return error("This software requires native support for the HTML5 canvas. Please use a modern browser :)");
@@ -97,19 +221,20 @@ function drawSunburst(realOpts) {
 	var opts = $.extend({
 		title: '',
 		total: null,
-		totals: {}
+		totals: {},
+		connections: {}
 	}, realOpts);
 
 	for (var key in realOpts) {
 		opts[key] = realOpts[key];
 	}
 
-	var json = { 
-		children: [],
+	var json = [{ 
 		data: { "$type": "none" },
 		id: "Source",
-		name: opts.title 
-	};
+		name: '',//opts.title,
+		adjacencies: []
+	}];
 
 	if (!opts.total) {
 		var total = 0;
@@ -123,18 +248,23 @@ function drawSunburst(realOpts) {
 
 	for (var name in opts.totals) {
 		var percent = ((opts.totals[name]/opts.total)*100).toFixed();
-	
-		json.children.push({ 
-			children: [], 
-			data: {
+
+		var node = { 
+			"children": [], 
+			"data": {
 				"$angularWidth": percent,
-				coverage: percent,
-				total: opts.totals[name],
-				"$color": Colors.find(name)
+				"coverage": percent,
+				"total": opts.totals[name],
+				"$color": Colors.find(name),
+				"$type": "none"
 			},
-			name: name,
-			id: name
-		});
+			"name": name,
+			"id": name,
+			"adjacencies": opts.connections[name]
+		}
+
+		json.push(node);
+		json[0].adjacencies.push(name);
 	}
 
 	var sb = new $jit.Sunburst({
@@ -147,6 +277,10 @@ function drawSunburst(realOpts) {
 		  overridable: true,
 		  type: 'gradient-multipie',
 		  alpha: 0
+		},
+		Edge: {
+		  overridable: true,
+		  type: 'none',
 		},
 		Label: {
 		  type: 'Native',

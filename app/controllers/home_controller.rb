@@ -6,6 +6,6 @@ class HomeController < ApplicationController
   end
 
   def index
-	render 'paras' unless ENV['RAILS_ENV'] == 'development'
+	render 'paras' #unless ENV['RAILS_ENV'] == 'development'
   end
 end
